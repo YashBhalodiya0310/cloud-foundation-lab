@@ -2,3 +2,14 @@
 __pycache__/
 .DS_Store
 .env
+
+# --- Day 2 logs ---
+day2/*.log
+
+# --- Editor backups ---
+*~
+*.swp
+
+# --- CDK build output ---
+infra/cdk.out/
+infra/.venv/
