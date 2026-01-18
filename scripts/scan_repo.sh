@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -26,7 +27,7 @@ USAGE
 TARGET="."
 LOG_FILE=""
 EXT_LIST=""
-
+MAX_FILES=50
 # Simple arg parser
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -105,4 +106,25 @@ if [[ -n "${EXT_LIST}" ]]; then
 fi
 
 log "==============================="
+log "Quality Gates"
+
+# Gate 1 — File count limit
+if (( TOTAL_FILES > MAX_FILES )); then
+  log "❌ FAIL: File count (${TOTAL_FILES}) exceeds limit (${MAX_FILES})"
+  exit 10
+else
+  log "✅ PASS: File count within limit (${MAX_FILES})"
+fi
+
+# Gate 2 — Secret file detection
+ENV_COUNT=$("${FIND_BASE[@]}" -name ".env" | wc -l | tr -d ' ')
+if (( ENV_COUNT > 0 )); then
+  log "❌ FAIL: Detected ${ENV_COUNT} .env file(s) — potential secret leak"
+  exit 20
+else
+  log "✅ PASS: No .env files detected"
+fi
+
+log "==============================="
 log "Scan Completed"
+exit 0
