@@ -1,0 +1,21 @@
+name: Repo Scan (Quality Gates)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build scanner image
+        run: docker build -t repo-scanner .
+
+      - name: Run scanner (CI simulation)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/repo" \
+            repo-scanner --path /repo --ext txt,md
