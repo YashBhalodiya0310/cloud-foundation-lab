@@ -13,3 +13,4 @@ day2/*.log
 # --- CDK build output ---
 infra/cdk.out/
 infra/.venv/
+infra/cdk.context.json
