@@ -14,3 +14,7 @@ day2/*.log
 infra/cdk.out/
 infra/.venv/
 infra/cdk.context.json
+
+# Logs
+*.log
+/day2/*.log
