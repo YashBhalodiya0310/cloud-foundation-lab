@@ -1,0 +1,25 @@
+name: Repo Scan (Quality Gates)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run repo scanner
+        run: |
+          chmod +x scripts/scan_repo.sh
+          mkdir -p day2
+          ./scripts/scan_repo.sh --path . --ext txt,md --json day2/report.json
+
+      - name: Upload scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-scan-report
+          path: day2/report.json
