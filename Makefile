@@ -1,30 +1,32 @@
-.PHONY: help setup scan clean docker-build docker-scan
-
-IMAGE_NAME=repo-scanner
+.PHONY: help scan synth deploy destroy outputs test
 
 help:
-	@echo "Available commands:"
-	@echo "  make setup        - Create virtual environment"
-	@echo "  make scan         - Run repo scan locally"
-	@echo "  make docker-build - Build scanner Docker image"
-	@echo "  make docker-scan  - Run scanner inside Docker (CI simulation)"
-	@echo "  make clean        - Remove logs"
-
-setup:
-	python3 -m venv .venv
-	@echo "Virtual environment ready."
+	@echo "Targets:"
+	@echo "  scan     - run repo scanner quality gates"
+	@echo "  synth    - CDK synth (infra)"
+	@echo "  deploy   - CDK deploy (infra)"
+	@echo "  destroy  - CDK destroy (infra)"
+	@echo "  outputs  - show CloudFormation outputs (infra)"
+	@echo "  test     - run infra unit tests"
 
 scan:
-	./scripts/scan_repo.sh --path . --ext txt,md --log day2/scan_make.log
+	./scripts/scan_repo.sh --path . --ext txt,md --json /tmp/report.json
 
-docker-build:
-	docker build -t $(IMAGE_NAME) .
+synth:
+	cd infra && npx -y aws-cdk@2 synth
 
-docker-scan:
-	docker run --rm \
-		-v "$$(pwd):/repo" \
-		$(IMAGE_NAME) --path /repo --ext txt,md
+deploy:
+	cd infra && npx -y aws-cdk@2 deploy
 
-clean:
-	rm -f day2/*.log
-	@echo "Logs cleaned."
+destroy:
+	cd infra && npx -y aws-cdk@2 destroy
+
+outputs:
+	aws cloudformation describe-stacks \
+	  --stack-name InfraStack \
+	  --region eu-west-2 \
+	  --query "Stacks[0].Outputs" \
+	  --output table
+
+test:
+	cd infra && python3 -m pip install -r requirements-dev.txt && python -m pytest -q
