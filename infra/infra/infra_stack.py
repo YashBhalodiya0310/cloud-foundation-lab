@@ -4,12 +4,13 @@ from aws_cdk import (
     aws_dynamodb as dynamodb,
     Tags,
     RemovalPolicy,
+    CfnOutput,
 )
 from constructs import Construct
 
 
 class InfraStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         bucket = s3.Bucket(
@@ -34,3 +35,6 @@ class InfraStack(Stack):
 
         Tags.of(bucket).add("project", "cloud-foundation-lab")
         Tags.of(table).add("project", "cloud-foundation-lab")
+
+        CfnOutput(self, "ArtifactsBucketName", value=bucket.bucket_name)
+        CfnOutput(self, "AppTableName", value=table.table_name)
